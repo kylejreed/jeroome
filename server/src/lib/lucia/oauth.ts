@@ -15,6 +15,7 @@ type OAuthHandler = {
 };
 
 const github = new GitHub(config.env.GITHUB_CLIENT_ID!, config.env.GITHUB_CLIENT_SECRET!);
+type GithubUserQueryResult = { id: number; login: string; avatar_url: string; name: string; email: string; };
 
 export const oauthProviders: Record<OAuthProvider, OAuthHandler> = {
     "github": {
@@ -38,8 +39,7 @@ export const oauthProviders: Record<OAuthProvider, OAuthHandler> = {
                         Authorization: `Bearer ${tokens.accessToken}`
                     }
                 });
-                const githubUserResult = await githubUserResponse.json() as { id: number; login: string; };
-                console.log(githubUserResult);
+                const githubUserResult = await githubUserResponse.json() as GithubUserQueryResult;
 
                 const [existingUser] = await db
                     .select()
@@ -54,6 +54,8 @@ export const oauthProviders: Record<OAuthProvider, OAuthHandler> = {
                 const [newUser] = await c.var.db.insert(schema.users).values({
                     id: userId,
                     username: githubUserResult.login,
+                    email: githubUserResult.email,
+                    name: githubUserResult.name,
                     role: "user",
                     oauth_provider: "github",
                     oauth_id: githubUserResult.id.toString(),

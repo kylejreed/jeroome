@@ -26,11 +26,10 @@ export const parseSession = createMiddleware<HonoContext>(async (c, next) => {
 
 export const requiresAuth = createMiddleware<HonoContext>(async (c, next) => {
     if (!c.var.user) {
-        c.body(null, 401);
-        return;
+        return c.body(null, 401);
     }
 
-    await next();
+    return next();
 });
 
 

@@ -12,6 +12,8 @@ export const lucia = new Lucia(adapter, {
     },
     getUserAttributes(attr) {
         return {
+            name: attr.name,
+            username: attr.username,
             email: attr.email,
             role: attr.role,
             oauth_provider: attr.oauth_provider,
@@ -24,6 +26,8 @@ declare module "lucia" {
     interface Register {
         Lucia: typeof lucia;
         DatabaseUserAttributes: {
+            name: string;
+            username: string;
             email: string;
             role: UserRole;
             oauth_provider?: OAuthProvider;

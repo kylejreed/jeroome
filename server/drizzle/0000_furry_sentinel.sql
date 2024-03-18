@@ -8,6 +8,12 @@ CREATE TABLE `user_session` (
 CREATE TABLE `user` (
 	`id` text PRIMARY KEY NOT NULL,
 	`name` text,
-	`email` text NOT NULL,
-	`password` text
+	`username` text NOT NULL,
+	`email` text,
+	`password` text,
+	`role` text DEFAULT 'user',
+	`oauth_provider` text,
+	`oauth_id` text
 );
+--> statement-breakpoint
+CREATE UNIQUE INDEX `user_username_unique` ON `user` (`username`);

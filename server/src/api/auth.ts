@@ -9,8 +9,8 @@ import { schema } from "@db";
 import { requiresAuth } from "middleware/auth";
 
 const validation = {
-    register: zValidator('json', z.object({ email: z.string().email(), password: z.string() })),
-    login: zValidator('json', z.object({ email: z.string().email(), password: z.string() }))
+    register: zValidator('json', z.object({ username: z.string().email(), password: z.string(), info: z.object({ email: z.string().optional(), name: z.string().optional() }).optional() })),
+    login: zValidator('json', z.object({ username: z.string().email(), password: z.string() }))
 };
 
 const AuthRouter = new Hono<HonoContext>();
@@ -65,12 +65,14 @@ AuthRouter.post("/register", validation.register, async (c) => {
     const userId = generateId(15);
     await c.var.db.insert(schema.users).values({
         id: userId,
-        email: body.email,
+        username: body.username,
         password: hash,
+        email: body.info?.email,
+        name: body.info?.name,
         role: "user"
     });
 
-    const session = await c.var.lucia.createSession(userId, { email: body.email, role: "user" });
+    const session = await c.var.lucia.createSession(userId, { username: body.username, email: body.info?.email, role: "user" });
     const cookie = c.var.lucia.createSessionCookie(session.id);
     setCookie(c, cookie.name, cookie.value, cookie.attributes as any);
     return c.json({
@@ -82,7 +84,7 @@ AuthRouter.post("/register", validation.register, async (c) => {
 
 AuthRouter.post("/login", validation.login, async (c) => {
     const body = c.req.valid('json');
-    const user = await c.var.db.query.users.findFirst({ where: (users, { eq }) => eq(users.email, body.email) });
+    const user = await c.var.db.query.users.findFirst({ where: (users, { eq }) => eq(users.username, body.username) });
     if (!user) {
         throw new Error('no user');
     }
@@ -90,7 +92,7 @@ AuthRouter.post("/login", validation.login, async (c) => {
     if (!valid) {
         throw new Error('invalid credentials');
     }
-    const session = await c.var.lucia.createSession(user.id, { email: body.email, role: "user" });
+    const session = await c.var.lucia.createSession(user.id, { username: user.username, email: user.email, role: "user" });
     const cookie = c.var.lucia.createSessionCookie(session.id);
     setCookie(c, cookie.name, cookie.value, cookie.attributes as any);
     return c.json({

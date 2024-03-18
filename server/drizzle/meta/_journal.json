@@ -5,15 +5,8 @@
     {
       "idx": 0,
       "version": "5",
-      "when": 1710651649219,
-      "tag": "0000_lying_punisher",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "5",
-      "when": 1710707983806,
-      "tag": "0001_blue_multiple_man",
+      "when": 1710784810628,
+      "tag": "0000_furry_sentinel",
       "breakpoints": true
     }
   ]
