@@ -23,6 +23,8 @@ const env = createEnv({
         // HOST_URL: z.string().min(1),
         TURSO_API_KEY: z.string().min(1),
         TURSO_ORG_SLUG: z.string().min(1),
+        GITHUB_CLIENT_ID: z.string().optional(),
+        GITHUB_CLIENT_SECRET: z.string().optional()
     },
     runtimeEnv: process.env,
 });

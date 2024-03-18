@@ -1,10 +1,10 @@
 import { Hono } from "hono";
-import { setCookie } from "hono/cookie";
+import { getCookie, setCookie } from "hono/cookie";
 import { zValidator } from "@hono/zod-validator";
 import { generateId } from "lucia";
 import { z } from "zod";
 
-import { type HonoContext } from "@types";
+import { type HonoContext, type OAuthProvider } from "@types";
 import { schema } from "@db";
 import { requiresAuth } from "middleware/auth";
 
@@ -16,11 +16,48 @@ const validation = {
 const AuthRouter = new Hono<HonoContext>();
 
 // Routes
+
+// GET
 AuthRouter.get("/whoami", requiresAuth, c => {
     const user = c.var.user!;
     return c.json({ ...user });
 });
 
+AuthRouter.get("/login/:provider", async (c) => {
+    const provider = c.req.param("provider") as OAuthProvider;
+    if (!c.var.oauth[provider]) {
+        return c.text("Invalid provider", 400);
+    }
+    return await c.var.oauth[provider].redirect(c);
+});
+
+AuthRouter.get("/login/:provider/callback", async (c) => {
+    const stateCookie = getCookie(c, "github_oauth_state");
+    const url = new URL(c.req.url);
+
+    const state = url.searchParams.get("state");
+    const code = url.searchParams.get("code");
+
+    if (!state || !stateCookie || !code || stateCookie !== state) {
+        return c.body(null, 400);
+    }
+
+    const provider = c.req.param("provider") as OAuthProvider;
+    const user = await c.var.oauth[provider].callback(c, code);
+    if (user) {
+        const session = await c.var.lucia.createSession(user.id, { email: user.email, role: user.role });
+        const cookie = c.var.lucia.createSessionCookie(session.id);
+        setCookie(c, cookie.name, cookie.value, cookie.attributes as any);
+        return c.json({
+            success: true,
+            userId: user.id,
+            token: session.id
+        });
+    }
+    return c.body(null, 400);
+});
+
+// POST
 AuthRouter.post("/register", validation.register, async (c) => {
     const body = c.req.valid('json');
 

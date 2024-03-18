@@ -1,6 +1,7 @@
 import type { Lucia, Session, User } from 'lucia';
 
 import type { TursoClient } from "./lib/turso";
+import type { OAuthHandlerMap } from './lib/lucia/oauth';
 import type { PrimaryDB } from "./db";
 import type { Config } from "./config";
 
@@ -21,7 +22,10 @@ export type HonoContext = {
         lucia: Lucia;
         user: User | null;
         session: Session | null;
+        oauth: OAuthHandlerMap;
     };
 };
 
-export type UserRole = "user" | "admin"
+export type UserRole = "user" | "admin";
+export type OAuthProvider = "github";
+

@@ -3,9 +3,12 @@ import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
 export const users = sqliteTable("user", {
     id: text("id").primaryKey(),
     name: text("name"),
-    email: text("email").unique().notNull(),
+    username: text("username").unique().notNull(),
+    email: text("email"),
     password: text("password"),
-    role: text("role").default("user")
+    role: text("role").default("user"),
+    oauth_provider: text("oauth_provider"),
+    oauth_id: text("oauth_id")
 });
 
 export const sessions = sqliteTable("user_session", {
@@ -16,3 +19,6 @@ export const sessions = sqliteTable("user_session", {
     expiresAt: integer("expires_at").notNull()
 });
 
+
+export type User = typeof users.$inferSelect;
+export type CreateUser = typeof users.$inferInsert;
