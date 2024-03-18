@@ -9,8 +9,8 @@ import { schema } from "@db";
 import { requiresAuth } from "middleware/auth";
 
 const validation = {
-    register: zValidator('json', z.object({ username: z.string().email(), password: z.string(), info: z.object({ email: z.string().optional(), name: z.string().optional() }).optional() })),
-    login: zValidator('json', z.object({ username: z.string().email(), password: z.string() }))
+    register: zValidator('json', z.object({ username: z.string(), password: z.string(), info: z.object({ email: z.string().optional(), name: z.string().optional() }).optional() })),
+    login: zValidator('json', z.object({ username: z.string(), password: z.string() })),
 };
 
 const AuthRouter = new Hono<HonoContext>();

@@ -4,6 +4,8 @@ import type { TursoClient } from "./lib/turso";
 import type { OAuthHandlerMap } from './lib/lucia/oauth';
 import type { PrimaryDB } from "./db";
 import type { Config } from "./config";
+import type { ServerWebSocket } from 'bun';
+import type { WSContext } from 'hono/ws';
 
 declare module "bun" {
     interface Env {
@@ -13,6 +15,9 @@ declare module "bun" {
         PORT?: number;
     }
 }
+
+export type SocketData = { id: string; user: User | null; };
+export type SocketContext = WSContext & { raw: ServerWebSocket<SocketData>; };
 
 export type HonoContext = {
     Variables: {
