@@ -18,6 +18,7 @@ declare module "bun" {
 
 export type SocketData = { id: string; user: User | null; };
 export type SocketContext = WSContext & { raw: ServerWebSocket<SocketData>; };
+export type WSMessage<T = unknown> = { event: string; data: T; };
 
 export type HonoContext = {
     Variables: {

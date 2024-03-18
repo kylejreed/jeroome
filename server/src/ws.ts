@@ -14,7 +14,8 @@ WebSocketRouter.get("/", upgradeWebSocket((c: Context<HonoContext>) => {
     return {
         onOpen: (_, ws) => {
             const context = ws as SocketContext;
-            context.raw.data = { id: generateId(15), user: c.var.user };
+            context.raw.data.id = generateId(15);
+            context.raw.data.user = c.var.user;
             wss.onOpen(new Socket(context));
         },
         onMessage: (e, ws) => {

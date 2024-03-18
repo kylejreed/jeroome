@@ -1,25 +1,35 @@
 import type { WSMessageReceive } from "hono/ws";
+
+import type { SocketContext, WSMessage } from "@types";
 import Socket from "./socket";
-import type { SocketContext } from "@types";
+import { handlers } from "./handlers";
 
 export default class WebSocketServer {
+    #handlers = handlers;
     #connections = new Map<string, Socket>();
 
-    constructor() { }
-
     onOpen(socket: Socket): void {
-        console.log("Connection!");
+        console.log("Connection!", socket.id);
         this.#connections.set(socket.id, socket);
+
+        socket.send("welcome", socket.user?.name ?? "Anon");
     }
 
     onMessage(socket: Socket, data: WSMessageReceive): void {
+        const message = this.#parseMessage(data);
+        if (message) {
+            console.log("Message received: ", message);
+            this.#handlers[message.event]?.(message?.data, socket);
+        }
     }
 
     onClose(socket: Socket, e: CloseEvent): void {
         this.#connections.delete(socket.id);
+        console.log("Disconnection!", socket.id, e.reason, e.code);
     }
 
     onError(socket: Socket, e: Event): void {
+        console.error("Error", e, socket.id);
     }
 
     getSocket(ws: SocketContext) {
@@ -27,5 +37,10 @@ export default class WebSocketServer {
         return this.#connections.get(id);
     }
 
+    #parseMessage<T>(msg: WSMessageReceive) {
+        if (typeof msg === "string") {
+            return JSON.parse(msg) as WSMessage<T>;
+        }
+    }
 }
 
