@@ -3,10 +3,12 @@ import type { WSMessageReceive } from "hono/ws";
 import type { SocketContext, WSMessage } from "@types";
 import Socket from "./socket";
 import { handlers } from "./handlers";
+import Rooms from "./rooms";
 
 export default class WebSocketServer {
     #handlers = handlers;
     #connections = new Map<string, Socket>();
+    rooms = new Rooms();
 
     onOpen(socket: Socket): void {
         console.log("Connection!", socket.id);
@@ -19,7 +21,7 @@ export default class WebSocketServer {
         const message = this.#parseMessage(data);
         if (message) {
             console.log("Message received: ", message);
-            this.#handlers[message.event]?.(message?.data, socket);
+            this.#handlers[message.type]?.(message?.data, socket, this);
         }
     }
 

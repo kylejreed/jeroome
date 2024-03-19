@@ -18,7 +18,9 @@ declare module "bun" {
 
 export type SocketData = { id: string; user: User | null; };
 export type SocketContext = WSContext & { raw: ServerWebSocket<SocketData>; };
-export type WSMessage<T = unknown> = { event: string; data: T; };
+export type IncomingEvent = "chat:join-room" | "chat:leave-room" | "chat:message";
+export type BroadcastEventType = "chat:new-user" | "chat:user-left" | "chat:message";
+export type WSMessage<T = unknown> = { type: IncomingEvent; data: T; };
 
 export type HonoContext = {
     Variables: {
