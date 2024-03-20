@@ -7,6 +7,7 @@ import { z } from "zod";
 import { type HonoContext, type OAuthProvider } from "@types";
 import { schema } from "@db";
 import { requiresAuth } from "middleware/auth";
+import { HTTPException } from "hono/http-exception";
 
 const validation = {
     register: zValidator('json', z.object({ username: z.string(), password: z.string(), info: z.object({ email: z.string().optional(), name: z.string().optional() }).optional() })),
@@ -86,11 +87,11 @@ AuthRouter.post("/login", validation.login, async (c) => {
     const body = c.req.valid('json');
     const user = await c.var.db.query.users.findFirst({ where: (users, { eq }) => eq(users.username, body.username) });
     if (!user) {
-        throw new Error('no user');
+        throw new HTTPException(401, { message: "Invalid credentials" });
     }
     const valid = await Bun.password.verify(body.password, user.password!);
     if (!valid) {
-        throw new Error('invalid credentials');
+        throw new HTTPException(401, { message: "Invalid credentials" });
     }
     const session = await c.var.lucia.createSession(user.id, { username: user.username, email: user.email, role: "user" });
     const cookie = c.var.lucia.createSessionCookie(session.id);

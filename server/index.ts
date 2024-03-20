@@ -1,3 +1,4 @@
+import { showRoutes } from "hono/dev";
 import server, { websocket } from "./src/server";
 import { config } from "@config";
 
@@ -7,5 +8,7 @@ const app = Bun.serve({
     websocket
 });
 
+
 console.clear();
 console.log(`🚀 Server running at: ${app.url.toString()}`);
+showRoutes(server);

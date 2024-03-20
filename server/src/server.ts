@@ -3,6 +3,7 @@ import API from './api';
 import WebSocketRouter, { websocket } from './ws';
 import { parseSession, appContext } from './middleware';
 import type { HonoContext } from '@types';
+import { HTTPException } from 'hono/http-exception';
 
 const server = new Hono<HonoContext>();
 
@@ -14,6 +15,12 @@ server.use(parseSession);
 server.route("/api", API);
 server.route("/ws", WebSocketRouter);
 server.get("/", c => c.text(`Welcome, ${c.var.user?.name ?? "anon"}!`));
+
+server.onError((err, c) => {
+    if (err instanceof HTTPException) {
+        return err.getResponse();
+    }
+});
 
 export { websocket };
 export default server;
