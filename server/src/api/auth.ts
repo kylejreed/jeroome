@@ -9,7 +9,7 @@ import { schema } from "@db";
 import { requiresAuth } from "middleware/auth";
 import { HTTPException } from "hono/http-exception";
 import { and, eq } from "drizzle-orm";
-import type { User } from "@db/schema/auth";
+import type { CreateUser, User } from "@db/schema/auth";
 
 const validation = {
     register: zValidator('json', z.object({ username: z.string(), password: z.string(), info: z.object({ email: z.string().optional(), name: z.string().optional() }).optional() })),
@@ -63,16 +63,13 @@ AuthRouter.get("/login/:provider/callback", async (c) => {
             .where(and(eq(schema.users.oauth_provider, provider), eq(schema.users.oauth_id, oauthUser.id)));
 
         if (!appUser) {
-            const userId = generateId(15);
-            ([appUser] = await c.var.db.insert(schema.users).values({
-                id: userId,
+            appUser = await createNewUser(c, {
                 username: oauthUser.email,
                 email: oauthUser.email,
                 name: oauthUser.name,
-                role: "user",
                 oauth_provider: provider,
                 oauth_id: oauthUser.id,
-            }).returning());
+            });
         }
 
         return handleLoginSuccess(c, appUser);
@@ -84,16 +81,12 @@ AuthRouter.get("/login/:provider/callback", async (c) => {
 AuthRouter.post("/register", validation.register, async (c) => {
     const body = c.req.valid('json');
 
-    const hash = await Bun.password.hash(body.password);
-    const userId = generateId(15);
-    const [user] = await c.var.db.insert(schema.users).values({
-        id: userId,
+    const user = await createNewUser(c, {
         username: body.username,
-        password: hash,
+        password: body.password,
         email: body.info?.email,
         name: body.info?.name,
-        role: "user"
-    }).returning();
+    });
 
     return await handleLoginSuccess(c, user);
 });
@@ -113,6 +106,19 @@ AuthRouter.post("/login", validation.login, async (c) => {
 });
 
 // Helper functions
+async function createNewUser(c: Context<HonoContext>, data: Omit<CreateUser, "id" | "role">) {
+    if (data.password) {
+        data.password = await Bun.password.hash(data.password);
+    }
+    const userId = generateId(15);
+    const [user] = await c.var.db.insert(schema.users).values({
+        ...data,
+        id: userId,
+        role: "user"
+    }).returning();
+    return user;
+}
+
 async function handleLoginSuccess(c: Context<HonoContext>, user: User) {
     const session = await c.var.lucia.createSession(user.id, { username: user.username, email: user.email, role: "user" });
     const cookie = c.var.lucia.createSessionCookie(session.id);
