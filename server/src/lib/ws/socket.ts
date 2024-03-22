@@ -1,4 +1,4 @@
-import type { BroadcastEventType, SocketContext } from "@types";
+import type { OutgoingEventType, SocketContext } from "@types";
 
 export default class Socket {
     constructor(private ctx: SocketContext) { }
@@ -6,7 +6,7 @@ export default class Socket {
     get id() { return this.ctx.raw.data!.id; }
     get user() { return this.ctx.raw.data!.user; }
 
-    send<T>(type: BroadcastEventType, data: T) {
+    emit<T>(type: OutgoingEventType, data: T) {
         this.ctx.send(JSON.stringify({ type, data }));
     }
 }

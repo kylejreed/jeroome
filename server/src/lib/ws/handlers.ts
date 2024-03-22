@@ -1,9 +1,10 @@
+import type { IncomingEvent } from "@types";
 import type WebSocketServer from ".";
 import type Socket from "./socket";
 
 export type MessageHandler<T = any> = (data: T, socket: Socket, server: WebSocketServer) => void;
 
-export const handlers: Record<string, MessageHandler> = {
+export const handlers: Record<IncomingEvent, MessageHandler> = {
     "chat:join-room": (data: { roomName: string; }, socket, server) => {
         const room = server.rooms.join(data.roomName, socket);
         room.except(socket).emit("chat:new-user", { name: socket.user?.name ?? "Anon" });
@@ -18,5 +19,10 @@ export const handlers: Record<string, MessageHandler> = {
         if (server.rooms.isInRoom(data.roomName, socket)) {
             server.rooms.to(data.roomName).emit("chat:message", { user: socket.user, message: data.message });
         }
-    }
+    },
+    "chat:typing": (data: { roomName: string; typing: boolean; }, socket, server) => {
+        if (server.rooms.isInRoom(data.roomName, socket)) {
+            server.rooms.to(data.roomName).emit("chat:typing", { user: socket.user, typing: data.typing });
+        }
+    },
 }

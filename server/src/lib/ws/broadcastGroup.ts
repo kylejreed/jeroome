@@ -1,12 +1,12 @@
-import type { BroadcastEventType } from "types";
+import type { OutgoingEventType } from "types";
 import type Socket from "./socket";
 
 export default class BroadcastGroup {
     constructor(private sockets: Socket[]) { }
 
-    emit<Data>(type: BroadcastEventType, data: Data) {
+    emit<Data>(type: OutgoingEventType, data: Data) {
         for (const socket of this.sockets) {
-            socket.send(type, data);
+            socket.emit(type, data);
         }
     }
 

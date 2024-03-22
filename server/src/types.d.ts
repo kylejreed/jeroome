@@ -18,8 +18,8 @@ declare module "bun" {
 
 export type SocketData = { id: string; user: User | null; };
 export type SocketContext = WSContext & { raw: ServerWebSocket<SocketData>; };
-export type IncomingEvent = "chat:join-room" | "chat:leave-room" | "chat:message";
-export type BroadcastEventType = "welcome" | "chat:new-user" | "chat:user-left" | "chat:message";
+export type IncomingEvent = "chat:join-room" | "chat:leave-room" | "chat:message" | "chat:typing";
+export type OutgoingEventType = "welcome" | "chat:new-user" | "chat:user-left" | "chat:message" | "chat:typing";
 export type WSMessage<T = unknown> = { type: IncomingEvent; data: T; };
 
 export type HonoContext = {
@@ -35,5 +35,5 @@ export type HonoContext = {
 };
 
 export type UserRole = "user" | "admin";
-export type OAuthProvider = "github";
+export type OAuthProvider = "github" | "google";
 

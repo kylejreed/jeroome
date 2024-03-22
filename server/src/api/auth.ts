@@ -1,4 +1,4 @@
-import { Hono } from "hono";
+import { Hono, type Context } from "hono";
 import { getCookie, setCookie } from "hono/cookie";
 import { zValidator } from "@hono/zod-validator";
 import { generateId } from "lucia";
@@ -8,6 +8,8 @@ import { type HonoContext, type OAuthProvider } from "@types";
 import { schema } from "@db";
 import { requiresAuth } from "middleware/auth";
 import { HTTPException } from "hono/http-exception";
+import { and, eq } from "drizzle-orm";
+import type { User } from "@db/schema/auth";
 
 const validation = {
     register: zValidator('json', z.object({ username: z.string(), password: z.string(), info: z.object({ email: z.string().optional(), name: z.string().optional() }).optional() })),
@@ -29,11 +31,20 @@ AuthRouter.get("/login/:provider", async (c) => {
     if (!c.var.oauth[provider]) {
         return c.text("Invalid provider", 400);
     }
-    return await c.var.oauth[provider].redirect(c);
+    const url = await c.var.oauth[provider].getRedirectUrl(state => {
+        setCookie(c, "oauth_state", state, {
+            httpOnly: true,
+            secure: c.var.config.env.NODE_ENV === "production",
+            maxAge: 60 * 10, // 10 minutes
+            path: "/"
+        });
+    });
+
+    return c.redirect(url);
 });
 
 AuthRouter.get("/login/:provider/callback", async (c) => {
-    const stateCookie = getCookie(c, "github_oauth_state");
+    const stateCookie = getCookie(c, "oauth_state");
     const url = new URL(c.req.url);
 
     const state = url.searchParams.get("state");
@@ -44,16 +55,27 @@ AuthRouter.get("/login/:provider/callback", async (c) => {
     }
 
     const provider = c.req.param("provider") as OAuthProvider;
-    const user = await c.var.oauth[provider].callback(c, code);
-    if (user) {
-        const session = await c.var.lucia.createSession(user.id, { email: user.email, role: user.role });
-        const cookie = c.var.lucia.createSessionCookie(session.id);
-        setCookie(c, cookie.name, cookie.value, cookie.attributes as any);
-        return c.json({
-            success: true,
-            userId: user.id,
-            token: session.id
-        });
+    const oauthUser = await c.var.oauth[provider].callback(c, code);
+    if (oauthUser) {
+        let [appUser] = await c.var.db
+            .select()
+            .from(schema.users)
+            .where(and(eq(schema.users.oauth_provider, provider), eq(schema.users.oauth_id, oauthUser.id)));
+
+        if (!appUser) {
+            const userId = generateId(15);
+            ([appUser] = await c.var.db.insert(schema.users).values({
+                id: userId,
+                username: oauthUser.email,
+                email: oauthUser.email,
+                name: oauthUser.name,
+                role: "user",
+                oauth_provider: provider,
+                oauth_id: oauthUser.id,
+            }).returning());
+        }
+
+        return handleLoginSuccess(c, appUser);
     }
     return c.body(null, 400);
 });
@@ -64,23 +86,16 @@ AuthRouter.post("/register", validation.register, async (c) => {
 
     const hash = await Bun.password.hash(body.password);
     const userId = generateId(15);
-    await c.var.db.insert(schema.users).values({
+    const [user] = await c.var.db.insert(schema.users).values({
         id: userId,
         username: body.username,
         password: hash,
         email: body.info?.email,
         name: body.info?.name,
         role: "user"
-    });
+    }).returning();
 
-    const session = await c.var.lucia.createSession(userId, { username: body.username, email: body.info?.email, role: "user" });
-    const cookie = c.var.lucia.createSessionCookie(session.id);
-    setCookie(c, cookie.name, cookie.value, cookie.attributes as any);
-    return c.json({
-        success: true,
-        userId,
-        token: session.id
-    });
+    return await handleLoginSuccess(c, user);
 });
 
 AuthRouter.post("/login", validation.login, async (c) => {
@@ -93,6 +108,12 @@ AuthRouter.post("/login", validation.login, async (c) => {
     if (!valid) {
         throw new HTTPException(401, { message: "Invalid credentials" });
     }
+
+    return await handleLoginSuccess(c, user);
+});
+
+// Helper functions
+async function handleLoginSuccess(c: Context<HonoContext>, user: User) {
     const session = await c.var.lucia.createSession(user.id, { username: user.username, email: user.email, role: "user" });
     const cookie = c.var.lucia.createSessionCookie(session.id);
     setCookie(c, cookie.name, cookie.value, cookie.attributes as any);
@@ -101,6 +122,6 @@ AuthRouter.post("/login", validation.login, async (c) => {
         userId: user.id,
         token: session.id
     });
-});
+}
 
 export default AuthRouter;

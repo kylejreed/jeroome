@@ -1,4 +1,4 @@
-import type { BroadcastEventType } from "types";
+import type { OutgoingEventType } from "types";
 import BroadcastGroup from "./broadcastGroup";
 import type Socket from "./socket";
 
@@ -61,7 +61,7 @@ class Room {
         this.sockets.delete(socket);
     }
 
-    emit<Data>(event: BroadcastEventType, data: Data) {
+    emit<Data>(event: OutgoingEventType, data: Data) {
         this.broadcast.emit(event, data);
     }
 

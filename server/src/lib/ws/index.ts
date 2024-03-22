@@ -14,7 +14,7 @@ export default class WebSocketServer {
         console.log("Connection!", socket.id);
         this.#connections.set(socket.id, socket);
 
-        socket.send("welcome", socket.user?.name ?? "Anon");
+        socket.emit("welcome", socket.user?.name ?? "Anon");
     }
 
     onMessage(socket: Socket, data: WSMessageReceive): void {
