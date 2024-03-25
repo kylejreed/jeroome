@@ -1,9 +1,11 @@
+import { PriorityQueue } from "@datastructures-js/priority-queue";
 import { generateId } from "lucia";
 
 type UserId = string;
 type UserInQueue = {
     userId: UserId;
     mmr: number;
+    adjustedMmr: number;
     timestamp: number;
     onMatchFound: (match: Match) => void;
 };
@@ -26,27 +28,31 @@ type MatchmakingOptions = {
     numberOfTeams: number;
     playersPerTeam: number;
 };
+
+const FIVE_MINUTES = 5 * 60 * 1000;
+
 export default class Matchmaking {
-    #queue = new Map<UserId, UserInQueue>();
+    #queue = new PriorityQueue<UserInQueue>(this._queueComparator.bind(this));
 
     constructor(private options: MatchmakingOptions) {
     }
 
     addToQueue(userId: string, onMatchFound: (match: Match) => void) {
-        this.#queue.set(userId, {
+        this.#queue.enqueue({
             userId,
             mmr: 100,
+            adjustedMmr: 100,
             timestamp: Date.now(),
             onMatchFound
         });
     }
 
     removeFromQueue(userId: string) {
-        this.#queue.delete(userId);
+        this.#queue.remove(user => user.userId === userId);
     }
 
     getQueueStatus(userId: string) {
-        return { status: "inQueue", ...this.#queue.get(userId) };
+        return { status: "inQueue", ...this.#queue.toArray().find(user => user.userId === userId) };
     }
 
     findMatches() {
@@ -54,8 +60,8 @@ export default class Matchmaking {
         const totalNumberOfPlayers = playersPerTeam * numberOfTeams;
 
         const matchPlayers: UserInQueue[] = [];
-        while (matchPlayers.length < totalNumberOfPlayers && this.#queue.size > 0) {
-            const user = this.#queue.values().next().value;
+        while (matchPlayers.length < totalNumberOfPlayers && !this.#queue.isEmpty()) {
+            const user = this.#queue.dequeue();
             if (user) {
                 matchPlayers.push(user);
             }
@@ -82,5 +88,20 @@ export default class Matchmaking {
         }
 
         setTimeout(this.findMatches.bind(this), 2500);
+    }
+
+    run() {
+        const loop = () => {
+            this.findMatches();
+            setTimeout(loop, 2500);
+        };
+        loop();
+    }
+
+    private _queueComparator(a: UserInQueue, b: UserInQueue) {
+        if (a.mmr === b.mmr) {
+            return a.timestamp < b.timestamp ? 1 : -1;
+        }
+        return a.mmr > b.mmr ? 1 : -1;
     }
 }

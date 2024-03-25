@@ -5,7 +5,7 @@ const env = createEnv({
     server: {
         PORT: z.number().optional(),
         LOG_LEVEL: z.enum(["debug", "info", "warn", "error"]),
-        DATABASE_CONNECTION_TYPE: z.enum(["local", "remote", "local-replica"]),
+        DATABASE_CONNECTION_TYPE: z.enum(["test", "local", "remote", "local-replica"]),
         DATABASE_URL: z.string().min(1),
         DATABASE_AUTH_TOKEN: z
             .string()

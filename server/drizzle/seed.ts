@@ -1,10 +1,27 @@
 import db, { schema } from "@db";
-import { generateId } from "lucia";
+import { randEmail, randFullName, randUserName } from '@ngneat/falso';
+import { times } from '@lib/utils';
+import type { User } from "@db/schema/auth";
 
-const hash = await Bun.password.hash("admin1234!@#$");
-const userId = generateId(15);
+const create_password = (val: string) => Bun.password.hash(val);
 
-const existingAdmin = await db.query.users.findFirst({ where: (users, { eq }) => eq(users.username, "admin") });
-if (!existingAdmin) {
-    await db.insert(schema.users).values({ id: userId, name: "Admin", username: "admin", email: "admin@admin.com", password: hash, role: "admin" });
+export async function create_users(numUsers = 10) {
+    const insertValues: User[] = await Promise.all(times(numUsers, async i => ({
+        id: i.toString(),
+        name: randFullName(),
+        email: randEmail(),
+        username: randUserName(),
+        password: await create_password(i.toString()),
+        role: "user"
+    })));
+
+    return await db
+        .insert(schema.users)
+        .values(insertValues)
+        .returning();
+}
+
+if (import.meta.main) {
+    await db.delete(schema.users); // empty the table
+    await create_users(10);
 }

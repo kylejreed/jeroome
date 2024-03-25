@@ -6,6 +6,7 @@ import schema from "./schema";
 const { DATABASE_CONNECTION_TYPE } = config.env;
 
 const options = {
+    test: { url: "file:test.sqlite" },
     local: { url: "file:local.sqlite" },
     remote: {
         url: config.env.DATABASE_URL,
@@ -24,7 +25,7 @@ if (config.env.DATABASE_CONNECTION_TYPE === "local-replica") {
     await client.sync();
 }
 
-const db = drizzle(client, { schema, logger: true });
+const db = drizzle(client, { schema, logger: false });
 
 export type PrimaryDB = typeof db;
 export { schema };

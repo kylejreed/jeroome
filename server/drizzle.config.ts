@@ -3,6 +3,7 @@ import * as dotenv from "dotenv";
 dotenv.config();
 
 const options = {
+    test: { url: "file:test.sqlite" },
     local: { url: "file:local.sqlite" },
     remote: {
         url: process.env.DATABASE_URL,

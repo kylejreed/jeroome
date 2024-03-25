@@ -6,6 +6,7 @@ import { requiresAuth } from "middleware/auth";
 import Matchmaking from "@lib/matchmaking";
 
 const matchmaking = new Matchmaking({ numberOfTeams: 2, playersPerTeam: 1 });
+matchmaking.run();
 
 const MatchmakingRouter = new Hono<HonoContext>().use(requiresAuth);
 
@@ -20,13 +21,12 @@ MatchmakingRouter.post("/queue", async c => {
         matchmaking.addToQueue(userId, async match => {
             queueing = false;
             await stream.writeSSE({
-                data: JSON.stringify(match),
+                id: Date.now().toString(),
                 event: 'match-found',
-                id: Date.now().toString()
+                data: JSON.stringify(match),
             });
             await stream.close();
         });
-        // 
         stream.onAbort(() => {
             matchmaking.removeFromQueue(userId);
             queueing = false;

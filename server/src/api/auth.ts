@@ -2,17 +2,17 @@ import { Hono, type Context } from "hono";
 import { getCookie, setCookie } from "hono/cookie";
 import { zValidator } from "@hono/zod-validator";
 import { generateId } from "lucia";
-import { z } from "zod";
 
 import { type HonoContext, type OAuthProvider } from "@types";
 import { schema } from "@db";
 import { requiresAuth } from "middleware/auth";
 import { HTTPException } from "hono/http-exception";
 import { and, eq } from "drizzle-orm";
-import type { CreateUser, User } from "@db/schema/auth";
+import { insertUserSchema, type CreateUser, type User } from "@db/schema/auth";
+import { z } from "zod";
 
 const validation = {
-    register: zValidator('json', z.object({ username: z.string(), password: z.string(), info: z.object({ email: z.string().optional(), name: z.string().optional() }).optional() })),
+    register: zValidator('json', insertUserSchema.pick({ username: true, password: true, email: true, name: true, }).required({ password: true })),
     login: zValidator('json', z.object({ username: z.string(), password: z.string() })),
 };
 
@@ -84,8 +84,8 @@ AuthRouter.post("/register", validation.register, async (c) => {
     const user = await createNewUser(c, {
         username: body.username,
         password: body.password,
-        email: body.info?.email,
-        name: body.info?.name,
+        email: body.email,
+        name: body.name,
     });
 
     return await handleLoginSuccess(c, user);
@@ -97,7 +97,7 @@ AuthRouter.post("/login", validation.login, async (c) => {
     if (!user) {
         throw new HTTPException(401, { message: "Invalid credentials" });
     }
-    const valid = await Bun.password.verify(body.password, user.password!);
+    const valid = await Bun.password.verify(body.password!, user.password!);
     if (!valid) {
         throw new HTTPException(401, { message: "Invalid credentials" });
     }

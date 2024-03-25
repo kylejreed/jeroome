@@ -4,6 +4,7 @@ import WebSocketRouter, { websocket } from './ws';
 import { parseSession, appContext } from './middleware';
 import type { HonoContext } from '@types';
 import { HTTPException } from 'hono/http-exception';
+import { ZodDefault, ZodError } from 'zod';
 
 const server = new Hono<HonoContext>();
 
@@ -20,6 +21,13 @@ server.onError((err, c) => {
     if (err instanceof HTTPException) {
         return err.getResponse();
     }
+    if (err instanceof ZodError) {
+        return c.json(err, 400);
+    }
+    return c.json({
+        message: "Something went wrong",
+        error: err,
+    }, 500);
 });
 
 export { websocket };
