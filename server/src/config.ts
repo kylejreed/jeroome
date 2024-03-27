@@ -18,17 +18,15 @@ const env = createEnv({
                     : true;
             }),
         NODE_ENV: z.enum(["development", "production", "test"]),
-        // GOOGLE_CLIENT_ID: z.string().min(1),
-        // GOOGLE_CLIENT_SECRET: z.string().min(1),
-        // HOST_URL: z.string().min(1),
         TURSO_API_KEY: z.string().min(1),
         TURSO_ORG_SLUG: z.string().min(1),
         GITHUB_CLIENT_ID: z.string().optional(),
         GITHUB_CLIENT_SECRET: z.string().optional(),
         STOCK_API_KEY: z.string().optional(),
-        GOOGLE_CLIENT_ID: z.string().optional(),
-        GOOGLE_CLIENT_SECRET: z.string().optional(),
-        GOOGLE_REDIRECT_URI: z.string().optional()
+        GOOGLE_CLIENT_ID: z.string(),
+        GOOGLE_CLIENT_SECRET: z.string(),
+        GOOGLE_REDIRECT_URI: z.string(),
+        HUGGING_FACE_ACCESS_TOKEN: z.string().optional()
     },
     runtimeEnv: process.env,
 });
