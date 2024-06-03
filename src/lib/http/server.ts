@@ -1,6 +1,4 @@
 import { Hono, type MiddlewareHandler, type NotFoundHandler, type ErrorHandler } from "hono";
-import { showRoutes } from "hono/dev";
-import type { Handlers, Routes } from "./types";
 
 type CreateServerOpts<Decorator extends Record<string, any>> = {
   debug?: boolean;

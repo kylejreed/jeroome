@@ -1,4 +1,4 @@
-export * as HttpServer from "./server";
+export * as Http from "./http";
 export * as Auth from "./auth";
 export * as Database from "./database";
 export * as Repo from "./repo";

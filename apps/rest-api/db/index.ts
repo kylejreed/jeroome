@@ -1,4 +1,4 @@
-import { Database } from "~/lib";
+import { Database } from "@leserver";
 
 import { TodosRepo } from "./todos/repo";
 import { UsersRepo } from "./users/repo";

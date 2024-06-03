@@ -1,4 +1,4 @@
-import type { Context as HonoContext } from "hono";
+import type { Context as HttpContext } from "@leserver/http";
 import type { DB } from "./db";
 import type { Env } from "./config";
 
@@ -10,4 +10,4 @@ export type AppContext = {
   token?: string;
   auth: { sign: (u: UserTokenInfo) => string };
 };
-export type Context = HonoContext<{ Variables: AppContext }>;
+export type Context = HttpContext<AppContext>;

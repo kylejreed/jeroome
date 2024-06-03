@@ -1,4 +1,4 @@
-import { Config } from "./lib";
+import { Config } from "@leserver";
 
 export const env = Config.createEnv((z) => ({
   PORT: z.string().default("3000"),
