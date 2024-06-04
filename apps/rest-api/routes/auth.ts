@@ -4,10 +4,17 @@ import type { AppContext } from "../context";
 const AuthRouter = Http.router<AppContext, "">("");
 
 AuthRouter.get(
+  "/asdf",
+  ({ user, session }) => {
+    return { user, session };
+  },
+  {},
+);
+
+AuthRouter.get(
   "/whoami",
-  async ({ db, user }) => {
-    const fullUser = await db.users.findOne({ id: user!.id });
-    return fullUser;
+  ({ user }) => {
+    return user;
   },
   {
     beforeHandle: ({ user, error }) => !user && error(403),

@@ -8,12 +8,23 @@ type JwtAuthOpts<TokenInfo = {}, User = {}> = {
 };
 export const jwt = <TokenInfo = {}, User = {}>({ secret, getUser }: JwtAuthOpts<TokenInfo, User>): AuthHandler => ({
   sign: (user) => sign(user, secret),
-  getToken: (req) => {
-    const authorization = req.headers.get("Authorization");
-    return authorization?.startsWith("Bearer ") ? authorization.split(" ")[1] : null;
-  },
-  verify: async (token) => {
+  validate: async ({ request }) => {
+    const authorization = request.headers.get("Authorization");
+    const token = authorization?.startsWith("Bearer ") ? authorization.split(" ")[1] : null;
+    if (!token) {
+      return { user: null, session: null };
+    }
+
     const info = verify(token, secret);
-    return await getUser(info as TokenInfo);
+    const user = await getUser(info as TokenInfo);
+    return {
+      user,
+      session: {
+        id: "jwt",
+        fresh: false,
+        userId: 1,
+        expiresAt: new Date("3000-01-01"),
+      },
+    };
   },
 });

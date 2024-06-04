@@ -4,7 +4,7 @@ import { text, integer, sqliteTable } from "drizzle-orm/sqlite-core";
 export const users = sqliteTable("users", {
   id: integer("id").primaryKey().notNull(),
   email: text("email").unique().notNull(),
-  createdAt: integer("id", { mode: "timestamp" }).default(sql`CURRENT_TIMESTAMP`),
+  createdAt: integer("created_at", { mode: "timestamp" }).default(sql`CURRENT_TIMESTAMP`),
 });
 
 export type User = (typeof users)["$inferSelect"];

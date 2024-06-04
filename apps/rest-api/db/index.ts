@@ -7,8 +7,10 @@ import { schema } from "./schema";
 const dbInstance = await Database.sqlite("data.db", schema);
 
 const db = {
+  client: dbInstance,
   users: new UsersRepo(dbInstance),
   todos: new TodosRepo(dbInstance),
+  sessions: schema.sessions,
 };
 
 export { schema };

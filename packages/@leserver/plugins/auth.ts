@@ -1,18 +1,17 @@
-import Elysia from "elysia";
+import Elysia, { type Context } from "elysia";
+import type { Session } from "lucia";
 
-export type AuthHandler<TokenInfo extends object = {}, User = unknown> = {
+export type AuthHandler<TokenInfo = {}, User = unknown> = {
   sign: (tokenInfo: TokenInfo) => string;
-  getToken: (request: Request) => string | null;
-  verify: (token: string) => Promise<User | null>;
+  validate: (c: Context) => Promise<{ user: User | null; session?: Session | null }>;
 };
 
-export const authentication = <TokenInfo extends object = {}, User = unknown>(handler: AuthHandler<TokenInfo, User>) => {
+export const authentication = <TokenInfo = {}, User = unknown>(handler: AuthHandler<TokenInfo, User>) => {
   return new Elysia({ name: "@leserver/authentication" }).derive({ as: "scoped" }, async (c) => {
-    const token = handler.getToken(c.request);
-    const user = token ? await handler.verify(token) : null;
+    const { user, session } = await handler.validate(c);
     return {
-      token,
       user,
+      session,
       auth: { sign: handler.sign },
     };
   });
