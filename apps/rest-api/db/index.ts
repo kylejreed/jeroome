@@ -4,7 +4,7 @@ import { TodosRepo } from "./todos/repo";
 import { UsersRepo } from "./users/repo";
 import { schema } from "./schema";
 
-const dbInstance = await Database.sqlite("data.db", schema);
+const dbInstance = await Database.sqlite("data.db", schema, { migrationsFolder: "./drizzle" });
 
 const db = {
   client: dbInstance,

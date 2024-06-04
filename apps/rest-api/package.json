@@ -3,10 +3,12 @@
   "module": "index.ts",
   "type": "module",
   "scripts": {
-    "dev": "bun run --watch index.ts"
+    "dev": "bun run db:generate && bun run --watch index.ts",
+    "db:generate": "bunx drizzle-kit generate"
   },
   "devDependencies": {
-    "@types/bun": "latest"
+    "@types/bun": "latest",
+    "drizzle-kit": "^0.22.2"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"

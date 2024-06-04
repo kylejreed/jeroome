@@ -37,7 +37,7 @@ export const server = <Context extends Record<string, any>>(context: Partial<Con
     return r as AppRouter<Path, Context>;
   };
 
-  const run: LeServerAddons["run"] = (port: number, opts) => {
+  const run: LeServerAddons["run"] = (port, opts) => {
     app.use(swagger({ path: "/swagger", documentation: opts.documentation }));
     routers.forEach((r) => app.use(r));
     app.listen(port, (s) => {
