@@ -8,48 +8,48 @@ export class SqliteRepo<TSelect, TInsert, TUpdate, TUnique> {
   ) {}
 
   async findMany() {
-    return this.db.select().from(this.schema).all();
+    return this.db.select().from(this.schema).all() as TSelect[];
   }
 
-  findOne(where: TUnique): TSelect {
-    return this.db
+  async findOne(where: TUnique) {
+    return (await this.db
       .select()
       .from(this.schema)
-      .where(and(...this.toWhere(where))) as TSelect;
+      .where(and(...this.toWhere(where)))) as TSelect;
   }
 
-  exists(where: TUnique) {
-    return !!this.findOne(where);
+  async exists(where: TUnique) {
+    return await !!this.findOne(where);
   }
 
-  create(data: TInsert): void;
-  create(data: TInsert, returning?: boolean): TSelect;
-  create(data: TInsert, returning?: boolean): void | TSelect {
+  create(data: TInsert): Promise<void>;
+  create(data: TInsert, returning?: boolean): Promise<TSelect>;
+  async create(data: TInsert, returning?: boolean): Promise<void | TSelect> {
     const query = this.db.insert(this.schema).values(data as any);
     if (returning) {
-      return query.returning() as TSelect;
+      return (await query.returning()) as TSelect;
     }
 
-    query.execute();
+    await query.execute();
   }
 
-  update(where: TUnique, data: TUpdate): void;
-  update(where: TUnique, data: TUpdate, returning?: boolean): TSelect;
-  update(where: TUnique, data: TUpdate, returning?: boolean): void | TSelect {
+  async update(where: TUnique, data: TUpdate): Promise<void>;
+  async update(where: TUnique, data: TUpdate, returning?: boolean): Promise<TSelect>;
+  async update(where: TUnique, data: TUpdate, returning?: boolean): Promise<void | TSelect> {
     const query = this.db
       .update(this.schema)
       .set(data as any)
       .where(and(...this.toWhere(where)));
 
     if (returning) {
-      return query.returning() as TSelect;
+      return (await query.returning()) as TSelect;
     }
 
-    query.execute();
+    await query.execute();
   }
 
-  delete(where: TUnique) {
-    this.db.delete(this.schema).where(and(...this.toWhere(where)));
+  async delete(where: TUnique) {
+    await this.db.delete(this.schema).where(and(...this.toWhere(where)));
   }
 
   protected toWhere(where: Partial<TUnique>) {

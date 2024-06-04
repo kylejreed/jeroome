@@ -1,2 +1,2 @@
-export * from "./auth";
-export * from "./todos";
+export * as auth from "./auth";
+export { default as TodoRouter } from "./todos";

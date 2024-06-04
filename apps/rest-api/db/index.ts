@@ -11,5 +11,8 @@ const db = {
   todos: new TodosRepo(dbInstance),
 };
 
+export { schema };
+export type Schema = typeof schema;
+
 export type DB = typeof db;
 export default db;
