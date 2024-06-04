@@ -1,6 +1,6 @@
 import { Http, Auth, Plugin } from "@leserver";
 import db from "./db";
-import * as API from "./api";
+import * as Routes from "./routes";
 import type { AppContext, UserTokenInfo } from "./context";
 
 const jwt = Auth.jwt({
@@ -10,13 +10,14 @@ const jwt = Auth.jwt({
 });
 
 const server = Http.server<AppContext>({ db });
+server.use(Plugin.logger());
 server.use(Plugin.authentication(jwt));
 server.get("/", () => "hi");
-server.get("/whoami", API.auth.whoami, {
-  beforeHandle: ({ user, error }) => !user && error(403, "Need some auth bud"),
+server.get("/throw", () => {
+  throw new Error("sww");
 });
-server.post("/login", API.auth.loginUser);
-server.post("/register", API.auth.registerUser);
-server.use(API.TodoRouter);
+
+server.use(Routes.AuthRouter);
+server.use(Routes.TodoRouter);
 
 export default server;
