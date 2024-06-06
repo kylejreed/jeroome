@@ -5,3 +5,4 @@ export * as Database from "./database";
 export * as Repo from "./repo";
 export * as Plugin from "./plugins";
 export * as Config from "./config";
+export * as uploads from "./uploads";
