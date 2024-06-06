@@ -13,7 +13,7 @@ const TodoRouter = Http.router<AppContext, "/todos">("/todos");
 TodoRouter.get(
   "/",
   async ({ db }) => {
-    return await db.todos.findMany();
+    return await db.todos.getAll();
   },
   {
     response: v.todoListResponse,

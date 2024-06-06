@@ -1,13 +1,7 @@
 import { Http, Auth, Plugin } from "@leserver";
 import db from "./db";
 import * as Routes from "./routes";
-import type { AppContext, UserTokenInfo } from "./context";
-
-// const jwt = Auth.jwt({
-//   secret: "supersecret",
-//   getUser: (token: UserTokenInfo) => db.users.findOne({ id: token.id }),
-//   encodeValues: (user) => ({ id: user.id, email: user.email }),
-// });
+import type { AppContext } from "./context";
 
 const auth = Auth.lucia(db.client as any, db.sessions, db.users.schema);
 
@@ -18,5 +12,6 @@ server.get("/", () => "hi");
 
 server.use(Routes.AuthRouter);
 server.use(Routes.TodoRouter);
+server.use(Routes.TimerRouter);
 
 export default server;
