@@ -1,7 +1,7 @@
 import { and, eq } from "drizzle-orm";
 import type { BunSQLiteDatabase } from "drizzle-orm/bun-sqlite";
 
-export class SqliteRepo<TSelect, TInsert, TUpdate, TUnique extends Record<keyof TSelect, any>> {
+export class SqliteRepo<TSelect, TInsert, TUpdate, TUnique extends Partial<Record<keyof TSelect, any>>> {
   constructor(
     public db: BunSQLiteDatabase<any>,
     public schema: any,
