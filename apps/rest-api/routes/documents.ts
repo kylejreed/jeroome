@@ -1,4 +1,4 @@
-import { Http, t } from "@leserver";
+import { Http, t } from "leserver";
 import type { AppContext } from "context";
 
 const v = {

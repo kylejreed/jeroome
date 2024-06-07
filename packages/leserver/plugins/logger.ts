@@ -2,7 +2,7 @@ import Elysia, { StatusMap } from "elysia";
 import { color } from "../utils/cli";
 
 export const logger = () => {
-  return new Elysia({ name: "@leserver/logger" })
+  return new Elysia({ name: "leserver/logger" })
     .state("startTime", 0)
     .onRequest((c) => {
       c.store = { ...c.store, startTime: performance.now() };

@@ -7,7 +7,7 @@ export type AuthHandler<TokenInfo = {}, User = unknown> = {
 };
 
 export const authentication = <TokenInfo = {}, User = unknown>(handler: AuthHandler<TokenInfo, User>) => {
-  return new Elysia({ name: "@leserver/authentication" }).derive({ as: "scoped" }, async (c) => {
+  return new Elysia({ name: "leserver/authentication" }).derive({ as: "scoped" }, async (c) => {
     const { user, session } = await handler.validate(c);
     return {
       user,

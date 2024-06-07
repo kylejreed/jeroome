@@ -1,4 +1,4 @@
-import { Database } from "@leserver";
+import { Database } from "leserver";
 
 import { env } from "../config";
 import { schema } from "./schema";

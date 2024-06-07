@@ -1,4 +1,4 @@
-import { Http } from "@leserver";
+import { Http } from "leserver";
 import type { AppContext } from "../context";
 
 const AuthRouter = Http.router<AppContext, "">("");

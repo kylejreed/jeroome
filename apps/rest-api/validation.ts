@@ -1,4 +1,4 @@
-import { t } from "@leserver";
+import { t } from "leserver";
 
 export const numericId = t.Object({ id: t.Numeric() });
 export const newTodo = t.Object({ text: t.String() });

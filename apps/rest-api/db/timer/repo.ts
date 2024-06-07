@@ -1,6 +1,6 @@
 import type { BunSQLiteDatabase } from "drizzle-orm/bun-sqlite";
 
-import { Repo } from "@leserver";
+import { Repo } from "leserver";
 import { timer, type Timer, type TimerInsert, type TimerUpdate } from "./schema";
 import { eq, and, isNull, desc } from "drizzle-orm";
 

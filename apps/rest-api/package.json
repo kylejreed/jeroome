@@ -14,7 +14,7 @@
     "typescript": "^5.0.0"
   },
   "dependencies": {
-    "@leserver": "workspace:../../packages/@leserver",
+    "leserver": "workspace:../../packages/leserver",
     "chalk": "^5.3.0"
   }
 }

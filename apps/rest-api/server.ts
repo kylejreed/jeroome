@@ -1,4 +1,4 @@
-import { Http, Auth, Plugin, uploads } from "@leserver";
+import { Http, Auth, Plugin, uploads } from "leserver";
 import db from "./db";
 import * as Routes from "./routes";
 import type { AppContext } from "./context";

@@ -1,4 +1,4 @@
-import { Http } from "@leserver";
+import { Http } from "leserver";
 import type { AppContext } from "context";
 import { avg } from "../utils/math";
 import { zip } from "../utils/array";

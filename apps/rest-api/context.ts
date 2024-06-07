@@ -1,6 +1,6 @@
-import type { Context as HttpContext } from "@leserver/http";
-import type { Session } from "@leserver/auth";
-import type { Uploader } from "@leserver/uploads";
+import type { Context as HttpContext } from "leserver/http";
+import type { Session } from "leserver/auth";
+import type { Uploader } from "leserver/uploads";
 import type { DB } from "./db";
 import type { Env } from "./config";
 import type { User } from "db/schema";
